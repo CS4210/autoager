@@ -4,12 +4,16 @@ import tensorflow as tf
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 # Define paths for training and test data
-train_data_path = r"C:\Users\solar\OneDrive\Desktop\4210 Images\train\cars_train_make.csv"
-test_data_path = r"C:\Users\solar\OneDrive\Desktop\4210 Images\test\cars_test_make.csv"
+train_data_path = r"C:\Users\solar\OneDrive\Documents\GitHub\autoager\Car Train.csv"
+test_data_path = r"C:\Users\solar\OneDrive\Documents\GitHub\autoager\Car Test.csv"
 
-# Check if CSV files exist
-if not os.path.isfile(train_data_path) or not os.path.isfile(test_data_path):
-    raise FileNotFoundError("Training or test data CSV path is incorrect or does not exist.")
+# Check if CSV files exist and provide feedback if they do not
+if not os.path.isfile(train_data_path):
+    print(f"Training data CSV not found at: {train_data_path}")
+    raise FileNotFoundError("Training data CSV path is incorrect or does not exist.")
+if not os.path.isfile(test_data_path):
+    print(f"Test data CSV not found at: {test_data_path}")
+    raise FileNotFoundError("Test data CSV path is incorrect or does not exist.")
 
 # Load the training and test data from CSV
 train_df = pd.read_csv(train_data_path)
@@ -20,11 +24,17 @@ print("Training DataFrame:")
 print(train_df.head())  # Print the first few rows of the DataFrame
 print("Columns in Training DataFrame:", train_df.columns.tolist())  # Print the column names
 
-# Verify that 'label' and 'image_path' columns exist in the DataFrame
-if 'label' not in train_df.columns or 'image_path' not in train_df.columns:
-    raise ValueError("Training data must contain 'label' and 'image_path' columns.")
-if 'label' not in test_df.columns or 'image_path' not in test_df.columns:
-    raise ValueError("Test data must contain 'label' and 'image_path' columns.")
+# Rename columns to standardize format if necessary
+train_df.rename(columns={'Model': 'label', 'ID Image': 'image_path'}, inplace=True)
+test_df.rename(columns={'Model': 'label', 'ID Image': 'image_path'}, inplace=True)
+
+# Define image folders for training and test images
+train_images_folder = r"C:\Users\solar\OneDrive\Desktop\4210 Images\train_images"
+test_images_folder = r"C:\Users\solar\OneDrive\Desktop\4210 Images\test_images"
+
+# Construct the full image path for each image in the DataFrame
+train_df['image_path'] = train_df['image_path'].apply(lambda x: os.path.join(train_images_folder, f"{x}.jpg"))
+test_df['image_path'] = test_df['image_path'].apply(lambda x: os.path.join(test_images_folder, f"{x}.jpg"))
 
 # Image dimensions and batch size
 img_width, img_height = 224, 224
